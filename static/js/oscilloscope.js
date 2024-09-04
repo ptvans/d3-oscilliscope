@@ -168,4 +168,7 @@ function updateColorScale() {
 d3.select("#start-color").on("input", updateColorScale);
 d3.select("#end-color").on("input", updateColorScale);
 
+// Set initial fade duration value
+d3.select("#fade-duration-value").text(d3.select("#fade-duration").property("value"));
+
 // ... (keep the existing exportAsGif function and event listener)
