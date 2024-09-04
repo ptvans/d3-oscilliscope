@@ -12,6 +12,7 @@ let phase = 0;
 let fadeDuration = 5;
 let generators = [];
 let time = 0;
+let waveformType = "lissajous";
 
 // Create generators
 function createGenerators() {
@@ -28,8 +29,29 @@ function createGenerators() {
 function updateGenerators() {
     time += 0.01;
     generators.forEach((gen, i) => {
-        const x = width / 2 + amplitude * Math.sin(2 * Math.PI * frequency * time + i * phase);
-        const y = height / 2 + amplitude * Math.cos(2 * Math.PI * frequency * time + i * phase);
+        let x, y;
+        switch (waveformType) {
+            case "lissajous":
+                x = width / 2 + amplitude * Math.sin(2 * Math.PI * frequency * time + i * phase);
+                y = height / 2 + amplitude * Math.cos(2 * Math.PI * frequency * time + i * phase);
+                break;
+            case "spiral":
+                const radius = amplitude * time / 10;
+                x = width / 2 + radius * Math.cos(2 * Math.PI * frequency * time + i * phase);
+                y = height / 2 + radius * Math.sin(2 * Math.PI * frequency * time + i * phase);
+                break;
+            case "rose":
+                const k = 2 + i;
+                const r = amplitude * Math.cos(k * 2 * Math.PI * frequency * time);
+                x = width / 2 + r * Math.cos(2 * Math.PI * frequency * time);
+                y = height / 2 + r * Math.sin(2 * Math.PI * frequency * time);
+                break;
+            case "butterfly":
+                const t = 2 * Math.PI * frequency * time;
+                x = width / 2 + amplitude * (Math.sin(t) * (Math.exp(Math.cos(t)) - 2 * Math.cos(4 * t) - Math.pow(Math.sin(t / 12), 5)));
+                y = height / 2 + amplitude * (Math.cos(t) * (Math.exp(Math.cos(t)) - 2 * Math.cos(4 * t) - Math.pow(Math.sin(t / 12), 5)));
+                break;
+        }
         gen.x = x;
         gen.y = y;
     });
@@ -104,6 +126,11 @@ d3.select("#phase").on("input", function() {
 d3.select("#fade-duration").on("input", function() {
     fadeDuration = +this.value;
     d3.select("#fade-duration-value").text(fadeDuration.toFixed(1));
+});
+
+d3.select("#waveform-type").on("change", function() {
+    waveformType = this.value;
+    time = 0; // Reset time to start the new waveform from the beginning
 });
 
 // Resize handler
