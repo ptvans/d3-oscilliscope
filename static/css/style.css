@@ -69,6 +69,21 @@ select {
     border: 1px solid #4a4a4a;
 }
 
+button#export-gif {
+    width: 100%;
+    padding: 10px;
+    background-color: #00ff00;
+    color: #000000;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+button#export-gif:hover {
+    background-color: #00cc00;
+}
+
 @media (max-width: 768px) {
     .container {
         flex-direction: column;

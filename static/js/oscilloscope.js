@@ -1,143 +1,69 @@
-// Set up the SVG canvas
-const svg = d3.select("#oscilloscope");
-let width = svg.node().parentNode.clientWidth;
-let height = svg.node().parentNode.clientHeight;
-svg.attr("width", width).attr("height", height);
+// ... (previous code remains unchanged)
 
-// Initialize variables
-let numGenerators = 1;
-let frequency = 1;
-let amplitude = 50;
-let phase = 0;
-let fadeDuration = 5;
-let generators = [];
-let time = 0;
-let waveformType = "lissajous";
+// Export as GIF functionality
+function exportAsGif() {
+    console.log("Starting GIF export");
+    const exportButton = d3.select("#export-gif");
+    exportButton.text("Generating GIF...");
+    exportButton.attr("disabled", true);
 
-// Create generators
-function createGenerators() {
-    generators = [];
-    for (let i = 0; i < numGenerators; i++) {
-        generators.push({
-            id: i,
-            x: width / 2,
-            y: height / 2
-        });
+    console.log("Creating GIF object");
+    const gif = new GIF({
+        workers: 2,
+        quality: 5,
+        width: width,
+        height: height,
+        workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
+    });
+
+    let frames = 0;
+    const totalFrames = 100; // Adjust this value to change the length of the GIF
+
+    function captureFrame() {
+        console.log(`Capturing frame ${frames + 1} of ${totalFrames}`);
+        const svgData = new XMLSerializer().serializeToString(svg.node());
+        const img = new Image();
+        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
+
+        img.onload = function() {
+            console.log(`Processing frame ${frames + 1}`);
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            gif.addFrame(canvas, {delay: 50, copy: true});
+            frames++;
+
+            if (frames < totalFrames) {
+                updateGenerators();
+                drawDots();
+                requestAnimationFrame(captureFrame);
+            } else {
+                console.log("All frames captured, rendering GIF");
+                gif.render();
+            }
+        };
     }
-}
 
-// Update generator positions
-function updateGenerators() {
-    time += 0.01;
-    generators.forEach((gen, i) => {
-        let x, y;
-        switch (waveformType) {
-            case "lissajous":
-                x = width / 2 + amplitude * Math.sin(2 * Math.PI * frequency * time + i * phase);
-                y = height / 2 + amplitude * Math.cos(2 * Math.PI * frequency * time + i * phase);
-                break;
-            case "spiral":
-                const radius = amplitude * time / 10;
-                x = width / 2 + radius * Math.cos(2 * Math.PI * frequency * time + i * phase);
-                y = height / 2 + radius * Math.sin(2 * Math.PI * frequency * time + i * phase);
-                break;
-            case "rose":
-                const k = 2 + i;
-                const r = amplitude * Math.cos(k * 2 * Math.PI * frequency * time);
-                x = width / 2 + r * Math.cos(2 * Math.PI * frequency * time);
-                y = height / 2 + r * Math.sin(2 * Math.PI * frequency * time);
-                break;
-            case "butterfly":
-                const t = 2 * Math.PI * frequency * time;
-                x = width / 2 + amplitude * (Math.sin(t) * (Math.exp(Math.cos(t)) - 2 * Math.cos(4 * t) - Math.pow(Math.sin(t / 12), 5)));
-                y = height / 2 + amplitude * (Math.cos(t) * (Math.exp(Math.cos(t)) - 2 * Math.cos(4 * t) - Math.pow(Math.sin(t / 12), 5)));
-                break;
-        }
-        gen.x = x;
-        gen.y = y;
+    gif.on('progress', function(p) {
+        console.log(`GIF rendering progress: ${Math.round(p * 100)}%`);
     });
-}
 
-// Draw dots
-function drawDots() {
-    const dots = svg.selectAll(".dot")
-        .data(generators, d => d.id);
-
-    dots.enter()
-        .append("circle")
-        .attr("class", "dot")
-        .attr("r", 3)
-        .merge(dots)
-        .attr("fill", "#00ff00")
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y);
-
-    dots.exit().remove();
-
-    // Create fading dots
-    generators.forEach(gen => {
-        svg.append("circle")
-            .attr("class", "fading-dot")
-            .attr("r", 3)
-            .attr("cx", gen.x)
-            .attr("cy", gen.y)
-            .attr("fill", "#00ff00")
-            .attr("opacity", 1)
-            .transition()
-            .duration(fadeDuration * 1000)
-            .attr("opacity", 0)
-            .remove();
+    gif.on('finished', function(blob) {
+        console.log("GIF rendering finished");
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'oscilloscope.gif';
+        link.click();
+        exportButton.text("Export as GIF");
+        exportButton.attr("disabled", null);
+        console.log("GIF download initiated");
     });
+
+    console.log("Starting frame capture");
+    captureFrame();
 }
 
-// Animation loop
-function animate() {
-    updateGenerators();
-    drawDots();
-    requestAnimationFrame(animate);
-}
-
-// Initialize the simulation
-createGenerators();
-animate();
-
-// Event listeners for controls
-d3.select("#num-generators").on("input", function() {
-    numGenerators = +this.value;
-    d3.select("#num-generators-value").text(numGenerators);
-    createGenerators();
-});
-
-d3.select("#frequency").on("input", function() {
-    frequency = +this.value;
-    d3.select("#frequency-value").text(frequency.toFixed(1));
-});
-
-d3.select("#amplitude").on("input", function() {
-    amplitude = +this.value;
-    d3.select("#amplitude-value").text(amplitude);
-});
-
-d3.select("#phase").on("input", function() {
-    phase = +this.value;
-    d3.select("#phase-value").text(phase.toFixed(2));
-});
-
-d3.select("#fade-duration").on("input", function() {
-    fadeDuration = +this.value;
-    d3.select("#fade-duration-value").text(fadeDuration.toFixed(1));
-});
-
-d3.select("#waveform-type").on("change", function() {
-    waveformType = this.value;
-    time = 0; // Reset time to start the new waveform from the beginning
-});
-
-// Resize handler
-function resizeHandler() {
-    width = svg.node().parentNode.clientWidth;
-    height = svg.node().parentNode.clientHeight;
-    svg.attr("width", width).attr("height", height);
-}
-
-window.addEventListener("resize", resizeHandler);
+// Add event listener for the export button
+d3.select("#export-gif").on("click", exportAsGif);
