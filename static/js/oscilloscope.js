@@ -107,7 +107,7 @@ function createDots() {
 // Animation loop
 let lastTime = 0;
 let dotCreationTime = 0;
-const dotCreationInterval = 1000 / 60; // 60 times per second
+const dotCreationInterval = 1000 / 120; // 60 times per second
 
 function animate(time) {
     const deltaTime = time - lastTime;
@@ -144,6 +144,12 @@ d3.select("#num-generators").on("input", function() {
 // Update amplitude value display
 d3.select("#amplitude").on("input", function() {
     d3.select("#amplitude-value").text(this.value);
+});
+
+// Update frequency value display
+d3.select("#frequency").on("input", function() {
+    const value = parseFloat(this.value).toFixed(1);
+    d3.select("#frequency-value").text(value + " Hz");
 });
 
 // Update color scale when color inputs change
