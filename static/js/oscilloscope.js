@@ -124,4 +124,9 @@ d3.select("#fade-duration").on("input", function() {
     d3.select("#fade-duration-value").text(this.value);
 });
 
+// Update number of generators value display
+d3.select("#num-generators").on("input", function() {
+    d3.select("#num-generators-value").text(this.value);
+});
+
 // ... (keep the existing exportAsGif function and event listener)
