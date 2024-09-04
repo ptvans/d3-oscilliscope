@@ -1,69 +1,105 @@
-// ... (previous code remains unchanged)
+// Set up the SVG
+const svg = d3.select("#oscilloscope");
+const width = svg.node().getBoundingClientRect().width;
+const height = svg.node().getBoundingClientRect().height;
 
-// Export as GIF functionality
-function exportAsGif() {
-    console.log("Starting GIF export");
-    const exportButton = d3.select("#export-gif");
-    exportButton.text("Generating GIF...");
-    exportButton.attr("disabled", true);
+// Initialize generators array
+let generators = [];
 
-    console.log("Creating GIF object");
-    const gif = new GIF({
-        workers: 2,
-        quality: 5,
-        width: width,
-        height: height,
-        workerScript: 'https://cdnjs.cloudflare.com/ajax/libs/gif.js/0.2.0/gif.worker.js'
-    });
-
-    let frames = 0;
-    const totalFrames = 100; // Adjust this value to change the length of the GIF
-
-    function captureFrame() {
-        console.log(`Capturing frame ${frames + 1} of ${totalFrames}`);
-        const svgData = new XMLSerializer().serializeToString(svg.node());
-        const img = new Image();
-        img.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgData)));
-
-        img.onload = function() {
-            console.log(`Processing frame ${frames + 1}`);
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(img, 0, 0);
-            gif.addFrame(canvas, {delay: 50, copy: true});
-            frames++;
-
-            if (frames < totalFrames) {
-                updateGenerators();
-                drawDots();
-                requestAnimationFrame(captureFrame);
-            } else {
-                console.log("All frames captured, rendering GIF");
-                gif.render();
-            }
-        };
-    }
-
-    gif.on('progress', function(p) {
-        console.log(`GIF rendering progress: ${Math.round(p * 100)}%`);
-    });
-
-    gif.on('finished', function(blob) {
-        console.log("GIF rendering finished");
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = 'oscilloscope.gif';
-        link.click();
-        exportButton.text("Export as GIF");
-        exportButton.attr("disabled", null);
-        console.log("GIF download initiated");
-    });
-
-    console.log("Starting frame capture");
-    captureFrame();
+// Function to create a new generator
+function createGenerator() {
+    return {
+        x: 0,
+        y: 0,
+        frequency: parseFloat(d3.select("#frequency").property("value")),
+        amplitude: parseFloat(d3.select("#amplitude").property("value")),
+        phase: parseFloat(d3.select("#phase").property("value")),
+    };
 }
 
-// Add event listener for the export button
-d3.select("#export-gif").on("click", exportAsGif);
+// Function to update generators
+function updateGenerators() {
+    const numGenerators = parseInt(d3.select("#num-generators").property("value"));
+    while (generators.length < numGenerators) {
+        generators.push(createGenerator());
+    }
+    while (generators.length > numGenerators) {
+        generators.pop();
+    }
+
+    generators.forEach((gen, i) => {
+        gen.frequency = parseFloat(d3.select("#frequency").property("value"));
+        gen.amplitude = parseFloat(d3.select("#amplitude").property("value"));
+        gen.phase = parseFloat(d3.select("#phase").property("value")) + (i * Math.PI / generators.length);
+    });
+}
+
+// Function to calculate new positions
+function calculatePositions(t) {
+    generators.forEach(gen => {
+        const waveformType = d3.select("#waveform-type").property("value");
+        switch (waveformType) {
+            case "lissajous":
+                gen.x = width / 2 + gen.amplitude * Math.sin(gen.frequency * t + gen.phase);
+                gen.y = height / 2 + gen.amplitude * Math.sin(2 * gen.frequency * t);
+                break;
+            case "spiral":
+                const r = gen.amplitude * (1 - Math.exp(-0.1 * t));
+                gen.x = width / 2 + r * Math.cos(gen.frequency * t + gen.phase);
+                gen.y = height / 2 + r * Math.sin(gen.frequency * t + gen.phase);
+                break;
+            case "rose":
+                const k = 2;
+                const r_rose = gen.amplitude * Math.sin(k * (gen.frequency * t + gen.phase));
+                gen.x = width / 2 + r_rose * Math.cos(gen.frequency * t + gen.phase);
+                gen.y = height / 2 + r_rose * Math.sin(gen.frequency * t + gen.phase);
+                break;
+            case "butterfly":
+                const exp_t = Math.exp(Math.cos(t)) - 2 * Math.cos(4 * t) - Math.pow(Math.sin(t / 12), 5);
+                gen.x = width / 2 + gen.amplitude * Math.sin(t + gen.phase) * exp_t;
+                gen.y = height / 2 + gen.amplitude * Math.cos(t + gen.phase) * exp_t;
+                break;
+        }
+    });
+}
+
+// Function to draw dots
+function drawDots() {
+    const fadeDuration = parseFloat(d3.select("#fade-duration").property("value")) * 1000;
+    const dots = svg.selectAll("circle").data(generators);
+
+    dots.enter()
+        .append("circle")
+        .attr("r", 2)
+        .merge(dots)
+        .attr("cx", d => d.x)
+        .attr("cy", d => d.y)
+        .attr("fill", "#00ff00")
+        .transition()
+        .duration(fadeDuration)
+        .style("opacity", 0)
+        .remove();
+
+    dots.exit().remove();
+}
+
+// Animation loop
+let lastTime = 0;
+function animate(time) {
+    const deltaTime = time - lastTime;
+    lastTime = time;
+
+    updateGenerators();
+    calculatePositions(time / 1000);
+    drawDots();
+
+    requestAnimationFrame(animate);
+}
+
+// Start animation
+requestAnimationFrame(animate);
+
+// Add event listeners for controls
+d3.selectAll("input, select").on("input", updateGenerators);
+
+// ... (keep the existing exportAsGif function and event listener)
