@@ -90,10 +90,11 @@ function calculatePositions(t) {
 // Function to create new dots
 function createDots() {
     const fadeDuration = parseFloat(d3.select("#fade-duration").property("value")) * 1000;
+    const dotRadius = parseFloat(d3.select("#dot-radius").property("value"));
     
     generators.forEach(gen => {
         svg.append("circle")
-            .attr("r", 2)
+            .attr("r", dotRadius)
             .attr("cx", gen.x)
             .attr("cy", gen.y)
             .attr("fill", colorScale(gen.x))
@@ -107,7 +108,7 @@ function createDots() {
 // Animation loop
 let lastTime = 0;
 let dotCreationTime = 0;
-const dotCreationInterval = 1000 / 120; // 60 times per second
+const dotCreationInterval = 1000 / 300; // 60 times per second
 
 function animate(time) {
     const deltaTime = time - lastTime;
@@ -150,6 +151,11 @@ d3.select("#amplitude").on("input", function() {
 d3.select("#frequency").on("input", function() {
     const value = parseFloat(this.value).toFixed(1);
     d3.select("#frequency-value").text(value + " Hz");
+});
+
+// Update dot radius value display
+d3.select("#dot-radius").on("input", function() {
+    d3.select("#dot-radius-value").text(this.value);
 });
 
 // Update color scale when color inputs change
