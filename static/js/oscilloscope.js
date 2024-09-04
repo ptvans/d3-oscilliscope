@@ -1,7 +1,17 @@
 // Set up the SVG
 const svg = d3.select("#oscilloscope");
-const width = svg.node().getBoundingClientRect().width;
-const height = svg.node().getBoundingClientRect().height;
+let width, height;
+
+function updateSVGDimensions() {
+    const container = document.getElementById("canvas-container");
+    width = container.clientWidth;
+    height = container.clientHeight;
+    svg.attr("width", width).attr("height", height);
+}
+
+// Call updateSVGDimensions initially and on window resize
+updateSVGDimensions();
+window.addEventListener("resize", updateSVGDimensions);
 
 // Initialize generators array
 let generators = [];
