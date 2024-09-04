@@ -39,30 +39,37 @@ function updateGenerators() {
     });
 }
 
+// Function to calculate varying amplitude
+function calculateVaryingAmplitude(baseAmplitude, time, variationFrequency = 1.0, variationAmplitude = 0.2) {
+    return baseAmplitude * (1 + variationAmplitude * Math.sin(variationFrequency * time));
+}
+
 // Function to calculate new positions
 function calculatePositions(t) {
     generators.forEach(gen => {
         const waveformType = d3.select("#waveform-type").property("value");
+        const varyingAmplitude = calculateVaryingAmplitude(gen.amplitude, t);
+        
         switch (waveformType) {
             case "lissajous":
-                gen.x = width / 2 + gen.amplitude * Math.sin(gen.frequency * t + gen.phase);
-                gen.y = height / 2 + gen.amplitude * Math.sin(2 * gen.frequency * t);
+                gen.x = width / 2 + varyingAmplitude * Math.sin(gen.frequency * t + gen.phase);
+                gen.y = height / 2 + varyingAmplitude * Math.sin(2 * gen.frequency * t);
                 break;
             case "spiral":
-                const r = gen.amplitude * (1 - Math.exp(-0.1 * t));
+                const r = varyingAmplitude * (1 - Math.exp(-0.1 * t));
                 gen.x = width / 2 + r * Math.cos(gen.frequency * t + gen.phase);
                 gen.y = height / 2 + r * Math.sin(gen.frequency * t + gen.phase);
                 break;
             case "rose":
                 const k = 2;
-                const r_rose = gen.amplitude * Math.sin(k * (gen.frequency * t + gen.phase));
+                const r_rose = varyingAmplitude * Math.sin(k * (gen.frequency * t + gen.phase));
                 gen.x = width / 2 + r_rose * Math.cos(gen.frequency * t + gen.phase);
                 gen.y = height / 2 + r_rose * Math.sin(gen.frequency * t + gen.phase);
                 break;
             case "butterfly":
                 const exp_t = Math.exp(Math.cos(t)) - 2 * Math.cos(4 * t) - Math.pow(Math.sin(t / 12), 5);
-                gen.x = width / 2 + gen.amplitude * Math.sin(t + gen.phase) * exp_t;
-                gen.y = height / 2 + gen.amplitude * Math.cos(t + gen.phase) * exp_t;
+                gen.x = width / 2 + varyingAmplitude * Math.sin(t + gen.phase) * exp_t;
+                gen.y = height / 2 + varyingAmplitude * Math.cos(t + gen.phase) * exp_t;
                 break;
         }
     });
