@@ -63,35 +63,40 @@ function calculatePositions(t) {
     });
 }
 
-// Function to draw dots
-function drawDots() {
+// Function to create new dots
+function createDots() {
     const fadeDuration = parseFloat(d3.select("#fade-duration").property("value")) * 1000;
-    const dots = svg.selectAll("circle").data(generators);
-
-    dots.enter()
-        .append("circle")
-        .attr("r", 2)
-        .merge(dots)
-        .attr("cx", d => d.x)
-        .attr("cy", d => d.y)
-        .attr("fill", "#00ff00")
-        .transition()
-        .duration(fadeDuration)
-        .style("opacity", 0)
-        .remove();
-
-    dots.exit().remove();
+    
+    generators.forEach(gen => {
+        svg.append("circle")
+            .attr("r", 2)
+            .attr("cx", gen.x)
+            .attr("cy", gen.y)
+            .attr("fill", "#00ff00")
+            .transition()
+            .duration(fadeDuration)
+            .style("opacity", 0)
+            .remove();
+    });
 }
 
 // Animation loop
 let lastTime = 0;
+let dotCreationTime = 0;
+const dotCreationInterval = 1000 / 60; // 60 times per second
+
 function animate(time) {
     const deltaTime = time - lastTime;
     lastTime = time;
 
     updateGenerators();
     calculatePositions(time / 1000);
-    drawDots();
+
+    // Create new dots 60 times per second
+    if (time - dotCreationTime >= dotCreationInterval) {
+        createDots();
+        dotCreationTime = time;
+    }
 
     requestAnimationFrame(animate);
 }
