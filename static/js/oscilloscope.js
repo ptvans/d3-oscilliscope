@@ -17,9 +17,9 @@ window.addEventListener("resize", updateSVGDimensions);
 let generators = [];
 
 // Define color scale for interpolation
-const colorScale = d3.scaleLinear()
+let colorScale = d3.scaleLinear()
     .domain([0, width])
-    .range(["#00ff00", "#ff00ff"]);
+    .range([d3.select("#start-color").property("value"), d3.select("#end-color").property("value")]);
 
 // Function to create a new generator
 function createGenerator() {
@@ -145,5 +145,15 @@ d3.select("#num-generators").on("input", function() {
 d3.select("#amplitude").on("input", function() {
     d3.select("#amplitude-value").text(this.value);
 });
+
+// Update color scale when color inputs change
+function updateColorScale() {
+    const startColor = d3.select("#start-color").property("value");
+    const endColor = d3.select("#end-color").property("value");
+    colorScale.range([startColor, endColor]);
+}
+
+d3.select("#start-color").on("input", updateColorScale);
+d3.select("#end-color").on("input", updateColorScale);
 
 // ... (keep the existing exportAsGif function and event listener)
