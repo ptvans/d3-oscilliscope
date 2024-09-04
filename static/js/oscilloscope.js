@@ -6,6 +6,11 @@ const height = svg.node().getBoundingClientRect().height;
 // Initialize generators array
 let generators = [];
 
+// Define color scale for interpolation
+const colorScale = d3.scaleLinear()
+    .domain([0, width])
+    .range(["#00ff00", "#ff00ff"]);
+
 // Function to create a new generator
 function createGenerator() {
     return {
@@ -72,7 +77,7 @@ function createDots() {
             .attr("r", 2)
             .attr("cx", gen.x)
             .attr("cy", gen.y)
-            .attr("fill", "#00ff00")
+            .attr("fill", colorScale(gen.x))
             .transition()
             .duration(fadeDuration)
             .style("opacity", 0)
