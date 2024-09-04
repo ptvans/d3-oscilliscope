@@ -50,7 +50,7 @@ function updateGenerators() {
 }
 
 // Function to calculate varying amplitude
-function calculateVaryingAmplitude(baseAmplitude, time, variationFrequency = 1.0, variationAmplitude = 0.2) {
+function calculateVaryingAmplitude(baseAmplitude, time, variationFrequency = 10.0, variationAmplitude = 0.2) {
     return baseAmplitude * (1 + variationAmplitude * Math.sin(variationFrequency * time));
 }
 
