@@ -1,7 +1,7 @@
 // Set up the SVG canvas
 const svg = d3.select("#oscilloscope");
-const width = svg.node().parentNode.clientWidth;
-const height = svg.node().parentNode.clientHeight;
+let width = svg.node().parentNode.clientWidth;
+let height = svg.node().parentNode.clientHeight;
 svg.attr("width", width).attr("height", height);
 
 // Initialize variables
@@ -20,7 +20,8 @@ function createGenerators() {
     for (let i = 0; i < numGenerators; i++) {
         generators.push({
             id: i,
-            color: d3.interpolateRainbow(i / numGenerators)
+            x: width / 2,
+            y: height / 2
         });
     }
 }
@@ -66,9 +67,8 @@ function drawDots() {
         .append("circle")
         .attr("class", "dot")
         .attr("r", 3)
-        .attr("fill", d => d.color)
-        .attr("opacity", 1)
-    .merge(dots)
+        .merge(dots)
+        .attr("fill", "#00ff00")
         .attr("cx", d => d.x)
         .attr("cy", d => d.y);
 
@@ -81,7 +81,7 @@ function drawDots() {
             .attr("r", 3)
             .attr("cx", gen.x)
             .attr("cy", gen.y)
-            .attr("fill", gen.color)
+            .attr("fill", "#00ff00")
             .attr("opacity", 1)
             .transition()
             .duration(fadeDuration * 1000)
@@ -135,11 +135,9 @@ d3.select("#waveform-type").on("change", function() {
 
 // Resize handler
 function resizeHandler() {
-    const newWidth = svg.node().parentNode.clientWidth;
-    const newHeight = svg.node().parentNode.clientHeight;
-    svg.attr("width", newWidth).attr("height", newHeight);
-    width = newWidth;
-    height = newHeight;
+    width = svg.node().parentNode.clientWidth;
+    height = svg.node().parentNode.clientHeight;
+    svg.attr("width", width).attr("height", height);
 }
 
 window.addEventListener("resize", resizeHandler);
