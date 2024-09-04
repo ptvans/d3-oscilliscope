@@ -119,4 +119,9 @@ requestAnimationFrame(animate);
 // Add event listeners for controls
 d3.selectAll("input, select").on("input", updateGenerators);
 
+// Update fade duration value display
+d3.select("#fade-duration").on("input", function() {
+    d3.select("#fade-duration-value").text(this.value);
+});
+
 // ... (keep the existing exportAsGif function and event listener)
