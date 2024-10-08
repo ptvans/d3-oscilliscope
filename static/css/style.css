@@ -1,9 +1,9 @@
 body {
-    font-family: Arial, sans-serif;
+    font-family: Arial, sans-serif, Plex, IBM;
     margin: 0;
     padding: 0;
-    background-color: #1a1a1a;
-    color: #ffffff;
+    background-color: #111422;
+    color: #808893;
 }
 
 .container {
@@ -21,27 +21,33 @@ body {
 #oscilloscope {
     width: 100%;
     height: 100%;
-    background-color: #000000;
+    background-color: #111422;
 }
 
 #sidebar {
     width: 220px;
     padding: 20px;
-    background-color: #2a2a2a;
+    background-color: #16213c;
     overflow-y: auto;
 }
 
 h2 {
     margin-top: 0;
-    color: #00ff00;
+    color: #86a7c1;
 }
 
 .control {
     margin-bottom: 20px;
 }
 
+.control-color {
+    display: inline-block;
+    margin-right: 20px;
+}
+
 label {
     display: block;
+    font-size: 13px;
     margin-bottom: 5px;
 }
 
@@ -51,23 +57,25 @@ input[type="range"] {
 }
 
 input[type="color"] {
-    width: 100%;
-    height: 30px;
-    border: none;
+    width: 80px;
+    height: 36px;
+    border: 3px solid #353d50;
+    border-radius: 6px;
     padding: 0;
     background: none;
 }
 
 span {
     font-size: 0.9em;
-    color: #00ff00;
+    font-weight: 600;
+    color: #3d97eb;
 }
 
 select {
     width: 100%;
     padding: 5px;
     background-color: #3a3a3a;
-    color: #ffffff;
+    color: #d6e1e6;
     border: 1px solid #4a4a4a;
 }
 

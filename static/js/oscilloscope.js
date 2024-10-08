@@ -49,11 +49,24 @@ function updateGenerators() {
     });
 }
 
-// Function to calculate varying amplitude
-function calculateVaryingAmplitude(baseAmplitude, time, variationFrequency = 10.0, variationAmplitude = 0.2) {
-    return baseAmplitude * (1 + variationAmplitude * Math.sin(variationFrequency * time));
-}
+// Get the amplitude variation elements
+const amplitudeVariationInput = document.getElementById('amplitude-variation');
+const amplitudeVariationValue = document.getElementById('amplitude-variation-value');
 
+// Default amplitude variation
+let amplitudeVariation = parseInt(amplitudeVariationInput.value, 10);
+
+// Event listener for amplitude variation change
+amplitudeVariationInput.addEventListener('input', function() {
+    amplitudeVariation = parseInt(amplitudeVariationInput.value, 10);
+    amplitudeVariationValue.textContent = amplitudeVariation;
+});
+
+// Existing code:
+// Function to calculate varying amplitude
+function calculateVaryingAmplitude(baseAmplitude, time, ampVariationFrequency = 10.0, ampVariationAmplitude = 0.2) {
+    return baseAmplitude * (1 + ampVariationAmplitude * Math.sin(ampVariationFrequency * time));
+}
 // Function to calculate new positions
 function calculatePositions(t) {
     const maxDimension = Math.min(width, height);
@@ -108,7 +121,7 @@ function createDots() {
 // Animation loop
 let lastTime = 0;
 let dotCreationTime = 0;
-const dotCreationInterval = 1000 / 300; // 60 times per second
+const dotCreationInterval = 1000 / 300; // 300 times per second
 
 function animate(time) {
     const deltaTime = time - lastTime;
